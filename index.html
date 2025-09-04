@@ -2,338 +2,158 @@
 <html lang="ja">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>メモ帳</title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@400;700&display=swap" rel="stylesheet">
-  <script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
-  <style>
-    * { box-sizing: border-box; }
-    body {
-      font-family: 'Noto Sans JP', sans-serif;
-      margin: 0;
-      background: #f0f2f5;
-      color: #333;
-    }
-    #topButtons {
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      background-color: #ffffff;
-      padding: 1rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-      justify-content: flex-start;
-      align-items: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-      z-index: 1000;
-    }
-    #pageTabs {
-      margin-top: 110px;
-      display: flex;
-      align-items: center;
-      padding: 0.5rem 1rem;
-      gap: 0.5rem;
-      overflow-x: auto;
-      white-space: nowrap;
-      background: #fff;
-      border-bottom: 1px solid #ccc;
-    }
-    .page-tab {
-      display: flex;
-      align-items: center;
-      padding: 0.3rem 0.6rem;
-      background: #e7eaf0;
-      border-radius: 20px;
-      font-size: 0.95rem;
-      cursor: pointer;
-      transition: background 0.3s;
-      flex-shrink: 0;
-    }
-    .page-tab:hover { background: #d2d6de; }
-    .page-tab.active {
-      background: #007bff;
-      color: white;
-    }
-    .page-tab button {
-      background: none;
-      border: none;
-      color: inherit;
-      margin-left: 0.5rem;
-      cursor: pointer;
-      font-weight: bold;
-    }
-    #editor {
-      margin: 1rem auto;
-      margin-top: 180px;
-      width: 90%;
-      max-width: 800px;
-      border-radius: 10px;
-      border: 1px solid #ccc;
-      padding: 1rem;
-      min-height: 400px;
-      background: #ffffff;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-    }
-    .masked {
-      background-color: red;
-      color: red;
-      cursor: pointer;
-      border-radius: 4px;
-      padding: 0 2px;
-      transition: all 0.3s ease;
-    }
-    .masked.revealed {
-      background-color: #ffcccc;
-      color: black;
-      opacity: 0.5;
-    }
-    .highlight {
-      background-color: yellow;
-      border-radius: 4px;
-      padding: 0 2px;
-    }
-    button {
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      padding: 0.5rem 1rem;
-      font-size: 1rem;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover { background: #0056b3; }
-    input[type="text"], input[type="file"], select {
-      padding: 0.5rem;
-      font-size: 1rem;
-      border: 1px solid #ccc;
-      border-radius: 6px;
-    }
-  </style>
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  />
+  <title>消費税法 暗記アプリ</title>
+
+  <!-- ※PWA関連は削除済み -->
+
+  <link rel="stylesheet" href="style.css" />
+
+  <!-- Chart.js（Dタブのグラフ用） -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
 </head>
 <body>
-  <div id="topButtons">
-    <button onclick="document.execCommand('undo')" title="元に戻す">⟲</button>
-    <button id="toggleBtn" onclick="toggleAll()">マーカー ON/OFF</button>
-    <button id="mmToggleBtn" onclick="toggleMarkMode()">MM: OFF</button>
-    <button onclick="toggleReadOnly()" title="閲覧モード切替">👁️</button>
-    <select id="fontSizeSelect" onchange="document.execCommand('fontSize', false, this.value)">
-      <option value="1">極小</option>
-      <option value="2">小</option>
-      <option value="3" selected>標準</option>
-      <option value="4">中</option>
-      <option value="5">大</option>
-      <option value="6">特大</option>
-      <option value="7">最大</option>
-    </select>
-    <button onclick="document.execCommand('bold')" title="太字"><b>B</b></button>
-    <input type="color" onchange="document.execCommand('foreColor', false, this.value)" title="文字色を変更" />
-    <button onclick="exportToFile()">出力</button>
-    <input type="file" accept=".txt,.html,.json" onchange="importFromFile(event)">
-    <input type="text" id="searchInput" placeholder="検索したい文字を入力" oninput="searchText()" />
+  <!-- ===== 上部固定タブ ===== -->
+  <header class="topbar">
+    <nav class="tabs">
+      <button class="tab-btn active" data-target="#tab-a">A 問題演習</button>
+      <button class="tab-btn" data-target="#tab-b">B 問題作成</button>
+      <button class="tab-btn" data-target="#tab-c">C 編集・確認</button>
+      <button class="tab-btn" data-target="#tab-d">D 記録</button>
+    </nav>
+  </header>
+
+  <main class="main">
+    <!-- ====== A: 問題演習 ====== -->
+    <section id="tab-a" class="page show">
+      <div class="card">
+        <h2>出題</h2>
+        <div class="controls">
+          <button id="startAllBtn" class="btn primary">すべてから出題</button>
+          <button id="startByCatBtn" class="btn">カテゴリから出題</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="problem-area">
+          <div id="questionContainer" class="question-container">
+            <div class="placeholder">ここに出題が表示されます。</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 下部固定バー（Aタブ専用） -->
+      <div class="bottombar" id="answerBar">
+        <button id="revealBtn" class="btn primary">解答確認</button>
+        <div id="judgeBtns" class="judge hidden">
+          <button class="btn good" data-mark="o">〇</button>
+          <button class="btn neutral" data-mark="d">△</button>
+          <button class="btn bad" data-mark="x">×</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== B: 問題作成 ====== -->
+    <section id="tab-b" class="page">
+      <div class="card">
+        <h2>問題作成</h2>
+        <div class="editor-controls">
+          <button id="maskBtn" class="btn">選択→マスク</button>
+          <button id="unmaskAllBtn" class="btn">マスク全解除</button>
+          <button id="repeatBtn" class="btn">繰り返し（直前ペースト）</button>
+          <button id="clearDraftBtn" class="btn">消去</button>
+        </div>
+
+        <div id="editor" class="editor" contenteditable="true" spellcheck="false"
+             placeholder="ここに長文をペーストし、問題にしたい箇所を選択→「選択→マスク」を押してください。複数箇所OK。"></div>
+
+        <div class="row">
+          <label for="catInput">カテゴリ（カンマ区切りで複数可）：</label>
+          <input id="catInput" type="text" class="input" placeholder="例：消費税法, 理論/総論, 軽減税率" />
+        </div>
+
+        <div class="row right">
+          <button id="saveProblemBtn" class="btn primary">保存（Cに追加）</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- ====== C: 編集・確認 ====== -->
+    <section id="tab-c" class="page">
+      <div class="card">
+        <h2>編集・確認</h2>
+
+        <div class="row wrap">
+          <div class="chips" id="catChips"></div>
+          <button id="clearCatFilterBtn" class="btn">カテゴリ絞り込み解除</button>
+        </div>
+
+        <div class="row gap">
+          <button id="exportJsonBtn" class="btn">エクスポート（JSON）</button>
+          <label class="btn">
+            インポート（JSON）
+            <input id="importJsonInput" type="file" accept="application/json" hidden />
+          </label>
+        </div>
+
+        <div id="problemList" class="problem-list"></div>
+      </div>
+    </section>
+
+    <!-- ====== D: 記録 ====== -->
+    <section id="tab-d" class="page">
+      <div class="card">
+        <h2>進捗グラフ（スコア到達数）</h2>
+        <div style="height:220px"><canvas id="progressChart"></canvas></div>
+      </div>
+
+      <div class="card">
+        <h2>日別記録（正答/回答）</h2>
+        <div id="dailyList" class="daily-list"></div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===== カテゴリ選択モーダル（Aタブ用） ===== -->
+  <div id="catModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content">
+      <h3>カテゴリを選択</h3>
+      <div id="catModalBody" class="modal-body"></div>
+      <div class="modal-actions">
+        <button id="catModalCancel" class="btn">キャンセル</button>
+        <button id="catModalStart" class="btn primary">このカテゴリで出題</button>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>
   </div>
-  <div id="pageTabs"></div>
-  <div id="editor" contenteditable="true"></div>
 
-  <script>
-    const correctPassword = "2410";
-    let currentPageId = null;
-    let pages = {};
-    let allVisible = false;
-    let markMode = false;
-    let readOnly = false;
+  <!-- ===== Cタブ詳細編集モーダル ===== -->
+  <div id="editModal" class="modal hidden" aria-hidden="true">
+    <div class="modal-content large">
+      <h3>問題編集</h3>
+      <div class="row">
+        <label>カテゴリ（カンマ区切り）：</label>
+        <input id="editCatInput" type="text" class="input" />
+      </div>
+      <div class="editor-controls">
+        <button id="editMaskBtn" class="btn">選択→マスク</button>
+        <button id="editUnmaskAllBtn" class="btn">マスク全解除</button>
+      </div>
+      <div id="editEditor" class="editor" contenteditable="true" spellcheck="false"></div>
+      <div class="row space">
+        <div class="muted" id="editMeta"></div>
+        <div class="modal-actions">
+          <button id="editCancelBtn" class="btn">閉じる</button>
+          <button id="editSaveBtn" class="btn primary">保存</button>
+        </div>
+      </div>
+    </div>
+    <div class="modal-backdrop"></div>
+  </div>
 
-    function adjustMargins() {
-      const topH = document.getElementById("topButtons").offsetHeight;
-      document.getElementById("pageTabs").style.marginTop = `${topH + 10}px`;
-      document.getElementById("editor").style.marginTop = `${topH + 80}px`;
-    }
-
-    function applyEventsToMasked(el) {
-      el.onclick = function () {
-        this.classList.toggle("revealed");
-      };
-      el.oncontextmenu = function (e) {
-        e.preventDefault();
-        const textNode = document.createTextNode(this.textContent);
-        this.replaceWith(textNode);
-      };
-    }
-
-    function maskSelection() {
-      const sel = window.getSelection();
-      if (!sel.rangeCount) return;
-      const range = sel.getRangeAt(0);
-      const selectedText = range.toString();
-      if (!selectedText) return;
-
-      const span = document.createElement("span");
-      span.className = "masked";
-      span.textContent = selectedText;
-      applyEventsToMasked(span);
-
-      range.deleteContents();
-      range.insertNode(span);
-    }
-
-    function toggleAll() {
-      document.querySelectorAll(".masked").forEach(el => el.classList.toggle("revealed", !allVisible));
-      allVisible = !allVisible;
-    }
-
-    function toggleMarkMode() {
-      markMode = !markMode;
-      document.getElementById("mmToggleBtn").textContent = `MM: ${markMode ? "ON" : "OFF"}`;
-    }
-
-    function toggleReadOnly() {
-      readOnly = !readOnly;
-      document.getElementById("editor").setAttribute("contenteditable", !readOnly);
-      alert(readOnly ? "閲覧モードになりました" : "編集モードに戻りました");
-    }
-
-    function searchText() {
-      const input = document.getElementById("searchInput").value;
-      const editor = document.getElementById("editor");
-      const text = editor.innerHTML;
-      editor.innerHTML = text.replace(/<span class="highlight">(.*?)<\/span>/g, "$1");
-      if (!input) return;
-      const pattern = new RegExp(input.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), "g");
-      editor.innerHTML = editor.innerHTML.replace(pattern, match => `<span class="highlight">${match}</span>`);
-      const highlight = document.querySelector(".highlight");
-      if (highlight) highlight.scrollIntoView({ behavior: "smooth", block: "center" });
-    }
-
-    function saveCurrentPageContent() {
-      if (currentPageId) {
-        const content = document.getElementById("editor").innerHTML;
-        const text = document.getElementById("editor").innerText.trim().split("\n")[0] || "無題メモ";
-        pages[currentPageId] = { ...pages[currentPageId], name: text, content: content };
-        localStorage.setItem("pages", JSON.stringify(pages));
-        renderTabs();
-      }
-    }
-
-    function switchToPage(id) {
-      saveCurrentPageContent();
-      currentPageId = id;
-      document.getElementById("editor").innerHTML = pages[id].content || "";
-      document.querySelectorAll(".masked").forEach(applyEventsToMasked);
-      renderTabs();
-    }
-
-    function addNewPage() {
-      const id = "page_" + Date.now();
-      pages[id] = { name: "新しいメモ", content: "" };
-      currentPageId = id;
-      localStorage.setItem("pages", JSON.stringify(pages));
-      renderTabs();
-      switchToPage(id);
-    }
-
-    function renderTabs() {
-      const container = document.getElementById("pageTabs");
-      container.innerHTML = "";
-      const list = document.createElement("div");
-      list.style.display = "flex";
-      list.style.gap = "0.5rem";
-      for (const id in pages) {
-        const tab = document.createElement("div");
-        tab.className = "page-tab" + (id === currentPageId ? " active" : "");
-        tab.dataset.id = id;
-        const title = document.createElement("span");
-        title.textContent = pages[id].name;
-        title.onclick = () => switchToPage(id);
-        const del = document.createElement("button");
-        del.textContent = "×";
-        del.onclick = (e) => {
-          e.stopPropagation();
-          if (confirm(`「${pages[id].name}」を削除しますか？`)) {
-            delete pages[id];
-            localStorage.setItem("pages", JSON.stringify(pages));
-            const nextId = Object.keys(pages)[0];
-            currentPageId = nextId || null;
-            renderTabs();
-            switchToPage(nextId || null);
-          }
-        };
-        tab.appendChild(title);
-        tab.appendChild(del);
-        list.appendChild(tab);
-      }
-      container.appendChild(list);
-      const addBtn = document.createElement("button");
-      addBtn.textContent = "＋";
-      addBtn.onclick = addNewPage;
-      container.appendChild(addBtn);
-      new Sortable(list, {
-        animation: 150,
-        onEnd: () => {
-          const newOrder = Array.from(list.children).map(el => el.dataset.id);
-          const reordered = {};
-          newOrder.forEach(id => { if (pages[id]) reordered[id] = pages[id]; });
-          pages = reordered;
-          localStorage.setItem("pages", JSON.stringify(pages));
-          renderTabs();
-        }
-      });
-    }
-
-    function exportToFile() {
-      saveCurrentPageContent();
-      const blob = new Blob([JSON.stringify(pages)], { type: "application/json" });
-      const a = document.createElement("a");
-      a.href = URL.createObjectURL(blob);
-      a.download = "memo.json";
-      a.click();
-    }
-
-    function importFromFile(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          pages = JSON.parse(e.target.result);
-          currentPageId = Object.keys(pages)[0];
-          renderTabs();
-          switchToPage(currentPageId);
-        } catch (err) {
-          alert("ファイルの読み込みに失敗しました");
-        }
-      };
-      reader.readAsText(file);
-    }
-
-    window.onload = function () {
-      const pass = prompt("パスワードを入力してください:");
-      if (pass === correctPassword) {
-        document.getElementById("editor").style.display = "block";
-        const saved = localStorage.getItem("pages");
-        if (saved) {
-          pages = JSON.parse(saved);
-          currentPageId = Object.keys(pages)[0];
-        } else {
-          const id = "page_" + Date.now();
-          pages[id] = { name: "メモ 1", content: "" };
-          currentPageId = id;
-        }
-        renderTabs();
-        switchToPage(currentPageId);
-        adjustMargins();
-        window.addEventListener("resize", adjustMargins);
-        document.getElementById("editor").addEventListener("input", saveCurrentPageContent);
-        document.getElementById("editor").addEventListener("mouseup", () => {
-          if (markMode && window.getSelection().toString()) {
-            setTimeout(maskSelection, 0);
-          }
-        });
-      } else {
-        alert("パスワードが違います。終了します。");
-      }
-    };
-  </script>
+  <script src="app.js"></script>
 </body>
 </html>
